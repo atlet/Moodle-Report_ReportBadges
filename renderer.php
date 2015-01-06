@@ -21,6 +21,14 @@ class report_reportbadges_renderer extends plugin_renderer_base {
      * @param report_reportbadges $reportbadges reportbadges report.
      */
     public function report_selector_form(report_reportbadges $reportbadges) {
+        
+        $tmpYears = range(2000, date("Y"));
+        $years[] = '';
+        
+        foreach ($tmpYears as $value) {
+            $years[$value] = $value;
+        }
+        
         echo html_writer::start_tag('form',
                 array('class' => 'reportbadgesselecform', 'action' => $reportbadges->url, 'method' => 'get'));
         echo html_writer::start_div();
@@ -30,6 +38,9 @@ class report_reportbadges_renderer extends plugin_renderer_base {
         echo html_writer::label(get_string('selectreporttype', 'report_reportbadges'), 'menureader', false);
         echo html_writer::select($reportbadges->getAvailablereports(), 'reporttype', $reportbadges->reporttype, false);
 
+        echo html_writer::label(get_string('selectreportyear', 'report_reportbadges'), 'menureader', false);
+        echo html_writer::select($years, 'reportyear', $reportbadges->reportyear, false);
+        
         echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('showreport', 'report_reportbadges')));
 
         echo html_writer::end_div();

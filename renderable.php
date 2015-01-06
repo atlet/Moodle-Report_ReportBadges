@@ -7,39 +7,49 @@
  * @copyright  2014 Andraž Prinčič <atletek@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die;
 
+require_once($CFG->dirroot . '/report/reportbadges/classes/report_reportbadges_list_users_badges_number.php');
+require_once($CFG->dirroot . '/report/reportbadges/classes/report_reportbadges_list_users_badges.php');
+require_once($CFG->dirroot . '/report/reportbadges/classes/report_reportbadges_list_badges_users_number.php');
+
 class report_reportbadges implements renderable {
-    
+
     /** @var moodle_url url of report page */
     public $url;
-    
+
     /** @var string selected report list to display */
     public $reporttype = null;
-    
     public $courseid;
-    
-    
+    public $table;
+    public $reportyear;
+    private $whereOptions = array();
+    private $whereParameters = array();
+
     /**
      * Constructor.
      *
      * @param moodle_url|string $url (optional) page url.
      * @param string $reporttype (optional) which report list to display.
      */
-    public function __construct($courseid = NULL, $url = "", $reporttype = "") {
+    public function __construct($courseid = NULL, $url = "", $reporttype = "", $reportyear = "") {
 
-        global $PAGE;                
-        
+        global $PAGE;
+
+        $this->whereOptions[] = 't.criteriatype <> 0';
+
         $this->courseid = $courseid;
-        
+
+        $this->whereOptions[] = 'b.courseid = :courseid';
+        $this->whereParameters['courseid'] = $courseid;
+
         // Use page url if empty.
         if (empty($url)) {
             $this->url = new moodle_url($PAGE->url);
         } else {
             $this->url = new moodle_url($url);
         }
-        
+
         if (empty($reporttype)) {
             $rtypes = $this->getAvailablereports();
             if (!empty($rtypes)) {
@@ -49,19 +59,67 @@ class report_reportbadges implements renderable {
                 $reporttype = null;
             }
         }
-        
+
+        if (empty($reportyear) || $reportyear == 0) {
+            $this->reportyear = '';
+        } else {
+            $this->reportyear = $reportyear;
+
+            $this->whereOptions[] = 'YEAR(d.dateissued) = :reportyear';
+            $this->whereParameters['reportyear'] = $reportyear;
+        }
+
         $this->reporttype = $reporttype;
-        
     }
-    
+
     public function getAvailablereports() {
         return array(
-        1 => get_string('listusersandbadgescount', 'report_reportbadges'),
-        2 => get_string('listusersandbadges', 'report_reportbadges'),
-        3 => get_string('listbadgesanduserscount', 'report_reportbadges'), 
-        4 => get_string('listubadgesandusers', 'report_reportbadges'),
-        5 => get_string('listbyyear', 'report_reportbadges'),
-    );
+            1 => get_string('listusersandbadgescount', 'report_reportbadges'),
+            2 => get_string('listusersandbadges', 'report_reportbadges'),
+            3 => get_string('listbadgesanduserscount', 'report_reportbadges'),
+        );
     }
-    
+
+    public function show_table_list_badges_users_number() {
+        $this->table = new list_badges_users_number('report_log');
+        $this->table->set_sql('b.name AS badgename, COUNT(u.username) AS userscount',
+                "{badge_issued} AS d
+          JOIN {badge} AS b ON d.badgeid = b.id
+          JOIN {user} AS u ON d.userid = u.id
+          JOIN {badge_criteria} AS t ON b.id = t.badgeid", implode(' AND ', $this->whereOptions),
+                $this->whereParameters);
+        $this->table->define_baseurl($this->url);
+        $this->table->is_downloadable(false);
+        $this->table->show_download_buttons_at(array(TABLE_P_BOTTOM));
+        $this->table->out(25, true);
+    }
+
+    public function show_table_list_users_badges() {
+        $this->table = new list_users_badges('list_users_badges');
+        $this->table->set_sql('@row_num := @row_num + 1 as rNum, u.id, ' . get_all_user_name_fields(true, 'u') . ', CONCAT(u.firstname, \' \', u.lastname) AS fullname, u.username, b.name AS badgename',
+                "{badge_issued} AS d
+          JOIN {badge} AS b ON d.badgeid = b.id
+          JOIN {user} AS u ON d.userid = u.id
+          JOIN {badge_criteria} AS t ON b.id = t.badgeid
+          JOIN (SELECT @row_num := 0 FROM DUAL) as sub", implode(' AND ', $this->whereOptions), $this->whereParameters);
+        $this->table->define_baseurl($this->url);
+        $this->table->is_downloadable(false);
+        $this->table->show_download_buttons_at(array(TABLE_P_BOTTOM));
+        $this->table->out(25, true);
+    }
+
+    public function show_table_list_users_badges_number() {
+        $this->table = new list_users_badges_number('report_log');
+        $this->table->set_sql('u.id, ' . get_all_user_name_fields(true, 'u') . ', CONCAT(u.firstname, \' \', u.lastname) AS fullname, u.username, COUNT(*) AS badgescount',
+                "{badge_issued} AS d
+          JOIN {badge} AS b ON d.badgeid = b.id
+          JOIN {user} AS u ON d.userid = u.id
+          JOIN {badge_criteria} AS t ON b.id = t.badgeid", implode(' AND ', $this->whereOptions),
+                $this->whereParameters);
+        $this->table->define_baseurl($this->url);
+        $this->table->is_downloadable(false);
+        $this->table->show_download_buttons_at(array(TABLE_P_BOTTOM));
+        $this->table->out(25, true);
+    }
+
 }

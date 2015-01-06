@@ -15,8 +15,18 @@
         $string['listusersandbadgescount'] = 'List users with number of badges';
         $string['listusersandbadges'] = 'List users with their badges';
         $string['listbadgesanduserscount'] = 'List badges with number of users';
-        $string['listubadgesandusers'] = 'List badges with their users';
-        $string['listbyyear'] = 'List by year';
-        $string['selectreporttype'] = 'Select report type';
+        $string['selectreporttype'] = 'Report type';
         $string['showreport'] = 'Show report';
+        $string['selectreportyear'] = 'Year';
+        
+        // report_reportbadges_list_users_badges_number.php
+        $string['username'] = 'Username';
+        $string['badgescount'] = 'Number of badges';
+        $string['fullname'] = 'Full name';
+        
+        // report_reportbadges_list_users_badges.php
+        $string['badgename'] = 'Badge name';
+        
+        // report_reportbadges_list_badges_users_number.php
+        $string['userscount'] = 'Number of users';
         

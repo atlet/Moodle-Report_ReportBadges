@@ -13,4 +13,6 @@
 $module->version = 2015010504;
 $module->requires = 2013111800;  // Requires this Moodle 2.X version
 $module->release = '2.7';
-$module->maturity = MATURITY_STABLE;
+$module->maturity = MATURITY_ALPHA;
+
+//MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC or MATURITY_STABLE
