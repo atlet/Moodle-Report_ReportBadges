@@ -29,4 +29,5 @@
         
         // report_reportbadges_list_badges_users_number.php
         $string['userscount'] = 'Number of users';
+        $string['badgecertificate'] = 'Badge Certificate';
         

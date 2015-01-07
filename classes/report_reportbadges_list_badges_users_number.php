@@ -33,6 +33,18 @@ class list_badges_users_number extends table_sql {
         
     }
 
+    function col_badgename($values) {
+        
+        $ret = "";
+        
+        if (isset($values->certid) && !is_null($values->certid)) {
+            $url = new moodle_url('/local/badgecerts/overview.php', array('id' => $values->certid));
+            $ret = ' (<a href="' . $url . '">' . get_string('badgecertificate', 'report_reportbadges') . '</a>)';
+        }
+        
+        return $values->badgename . $ret;
+    }
+    
     function query_db($pagesize, $useinitialsbar = true) {
         global $DB;
         if (!$this->is_downloading()) {

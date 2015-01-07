@@ -81,8 +81,16 @@ class report_reportbadges implements renderable {
     }
 
     public function show_table_list_badges_users_number() {
+        global $CFG;
+        
+        $fields = 'b.name AS badgename, COUNT(u.username) AS userscount';
+        
+        if (file_exists($CFG->dirroot . '/local/badgecerts/lib.php')) {
+            $fields .= ', b.certid';
+        }
+        
         $this->table = new list_badges_users_number('report_log');
-        $this->table->set_sql('b.name AS badgename, COUNT(u.username) AS userscount',
+        $this->table->set_sql($fields,
                 "{badge_issued} AS d
           JOIN {badge} AS b ON d.badgeid = b.id
           JOIN {user} AS u ON d.userid = u.id
@@ -95,8 +103,16 @@ class report_reportbadges implements renderable {
     }
 
     public function show_table_list_users_badges() {
+        global $CFG;
+        
+        $fields = '@row_num := @row_num + 1 as rNum, u.id, ' . get_all_user_name_fields(true, 'u') . ', CONCAT(u.firstname, \' \', u.lastname) AS fullname, u.username, b.name AS badgename';
+        
+        if (file_exists($CFG->dirroot . '/local/badgecerts/lib.php')) {
+            $fields .= ', b.certid';
+        }
+        
         $this->table = new list_users_badges('list_users_badges');
-        $this->table->set_sql('@row_num := @row_num + 1 as rNum, u.id, ' . get_all_user_name_fields(true, 'u') . ', CONCAT(u.firstname, \' \', u.lastname) AS fullname, u.username, b.name AS badgename',
+        $this->table->set_sql($fields,
                 "{badge_issued} AS d
           JOIN {badge} AS b ON d.badgeid = b.id
           JOIN {user} AS u ON d.userid = u.id
