@@ -65,7 +65,7 @@ class report_reportbadges implements renderable {
         } else {
             $this->reportyear = $reportyear;
 
-            $this->whereOptions[] = 'YEAR(d.dateissued) = :reportyear';
+            $this->whereOptions[] = 'YEAR(FROM_UNIXTIME(d.dateissued)) = :reportyear';
             $this->whereParameters['reportyear'] = $reportyear;
         }
 
@@ -83,7 +83,7 @@ class report_reportbadges implements renderable {
     public function show_table_list_badges_users_number() {
         global $CFG;
         
-        $fields = 'b.name AS badgename, COUNT(u.username) AS userscount';
+        $fields = 'b.id, b.name AS badgename, COUNT(u.username) AS userscount';
         
         if (file_exists($CFG->dirroot . '/local/badgecerts/lib.php')) {
             $fields .= ', b.certid';
@@ -105,7 +105,7 @@ class report_reportbadges implements renderable {
     public function show_table_list_users_badges() {
         global $CFG;
         
-        $fields = '@row_num := @row_num + 1 as rNum, u.id, ' . get_all_user_name_fields(true, 'u') . ', CONCAT(u.firstname, \' \', u.lastname) AS fullname, u.username, b.name AS badgename';
+        $fields = 'u.id, ' . get_all_user_name_fields(true, 'u') . ', CONCAT(u.firstname, \' \', u.lastname) AS fullname, u.username, GROUP_CONCAT(CONCAT(b.name) SEPARATOR \';\') AS badgename, GROUP_CONCAT(CONCAT(b.id) SEPARATOR \';\') AS badgenameid ';
         
         if (file_exists($CFG->dirroot . '/local/badgecerts/lib.php')) {
             $fields .= ', b.certid';
@@ -116,8 +116,7 @@ class report_reportbadges implements renderable {
                 "{badge_issued} AS d
           JOIN {badge} AS b ON d.badgeid = b.id
           JOIN {user} AS u ON d.userid = u.id
-          JOIN {badge_criteria} AS t ON b.id = t.badgeid
-          JOIN (SELECT @row_num := 0 FROM DUAL) as sub", implode(' AND ', $this->whereOptions), $this->whereParameters);
+          JOIN {badge_criteria} AS t ON b.id = t.badgeid", implode(' AND ', $this->whereOptions), $this->whereParameters);
         $this->table->define_baseurl($this->url);
         $this->table->is_downloadable(false);
         $this->table->show_download_buttons_at(array(TABLE_P_BOTTOM));

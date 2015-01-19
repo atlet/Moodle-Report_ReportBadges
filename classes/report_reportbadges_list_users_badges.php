@@ -32,24 +32,30 @@ class list_users_badges extends table_sql {
     function other_cols($colname, $value) {
         
     }
-
-    function col_badgename($values) {
+    
+    function col_badgename($values) {        
+        $names = explode(';', $values->badgename);    
+        $ids = explode(';', $values->badgenameid);
         
-        $ret = "";
+        $badges = array_combine($ids, $names);
         
-        if (isset($values->certid) && !is_null($values->certid)) {
-            $url = new moodle_url('/local/badgecerts/overview.php', array('id' => $values->certid));
-            $ret = ' (<a href="' . $url . '">' . get_string('badgecertificate', 'report_reportbadges') . '</a>)';
+        $badgesR = array();
+        
+        foreach ($badges as $key => $value) {
+            $url = new moodle_url('/badges/overview.php', array('id' => $key));
+            $ret = '<a href="' . $url . '">' . $value . '</a>';
+            
+            $badgesR[] = $ret;
         }
         
-        return $values->badgename . $ret;
+        return implode(', ', $badgesR);
     }
     
     function query_db($pagesize, $useinitialsbar = true) {
         global $DB;
         if (!$this->is_downloading()) {
             if ($this->countsql === NULL) {
-                $this->countsql = 'SELECT COUNT(1) FROM (SELECT ' . $this->sql->fields . '  FROM ' . $this->sql->from . ' WHERE ' . $this->sql->where . ') AS sq; ';
+                $this->countsql = 'SELECT COUNT(1) FROM (SELECT ' . $this->sql->fields . '  FROM ' . $this->sql->from . ' WHERE ' . $this->sql->where . ' GROUP BY u.id) AS sq; ';
                 $this->countparams = $this->sql->params;
             }
             $grandtotal = $DB->count_records_sql($this->countsql, $this->countparams);
@@ -59,14 +65,16 @@ class list_users_badges extends table_sql {
 
             list($wsql, $wparams) = $this->get_sql_where();
             if ($wsql) {
-                $this->countsql = 'SELECT COUNT(1) FROM (SELECT ' . $this->sql->fields . '  FROM ' . $this->sql->from . ' WHERE ' . $this->sql->where . ' AND ' . $wsql . ') AS sq; ';
+                $this->countsql = 'SELECT COUNT(1) FROM (SELECT ' . $this->sql->fields . '  FROM ' . $this->sql->from . ' WHERE ' . $this->sql->where . ' AND ' . $wsql . ' GROUP BY u.id) AS sq; ';
                 $this->countparams = array_merge($this->countparams, $wparams);
 
-                $this->sql->where .= ' AND ' . $wsql;
+                $this->sql->where .= ' AND ' . $wsql;                
+                $this->sql->where .= ' GROUP BY u.id ';
                 $this->sql->params = array_merge($this->sql->params, $wparams);
 
                 $total = $DB->count_records_sql($this->countsql, $this->countparams);
             } else {
+                $this->sql->where .= ' GROUP BY u.id ';
                 $total = $grandtotal;
             }
 

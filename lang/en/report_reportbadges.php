@@ -18,6 +18,7 @@
         $string['selectreporttype'] = 'Report type';
         $string['showreport'] = 'Show report';
         $string['selectreportyear'] = 'Year';
+        $string['selecallyears'] = 'All years';
         
         // report_reportbadges_list_users_badges_number.php
         $string['username'] = 'Username';

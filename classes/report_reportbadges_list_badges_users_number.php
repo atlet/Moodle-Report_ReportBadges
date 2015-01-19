@@ -34,17 +34,22 @@ class list_badges_users_number extends table_sql {
     }
 
     function col_badgename($values) {
-        
-        $ret = "";
-        
-        if (isset($values->certid) && !is_null($values->certid)) {
-            $url = new moodle_url('/local/badgecerts/overview.php', array('id' => $values->certid));
-            $ret = ' (<a href="' . $url . '">' . get_string('badgecertificate', 'report_reportbadges') . '</a>)';
+
+        $fa = '';
+
+        if (isset($values->certid) && $values->certid > 0) {
+            $fa = '<i class="fa fa-university">';
         }
-        
-        return $values->badgename . $ret;
+
+        $url = new moodle_url('/badges/overview.php', array('id' => $values->id));
+        return '</i><a href="' . $url . '">' . $values->badgename . '</a>&nbsp;' . $fa;
     }
-    
+
+    function col_userscount($values) {
+        $url = new moodle_url('/badges/recipients.php', array('id' => $values->id));
+        return '<a href="' . $url . '">' . $values->userscount . '</a>';
+    }
+
     function query_db($pagesize, $useinitialsbar = true) {
         global $DB;
         if (!$this->is_downloading()) {
@@ -65,11 +70,11 @@ class list_badges_users_number extends table_sql {
                 $this->sql->where .= ' AND ' . $wsql;
                 $this->sql->params = array_merge($this->sql->params, $wparams);
 
-                $this->sql->where .= ' GROUP BY b.name' ;
-                
+                $this->sql->where .= ' GROUP BY b.name ';
+
                 $total = $DB->count_records_sql($this->countsql, $this->countparams);
             } else {
-                $this->sql->where .= ' GROUP BY b.name' ;
+                $this->sql->where .= ' GROUP BY b.name ';
                 $total = $grandtotal;
             }
 
