@@ -24,7 +24,7 @@ class report_reportbadges_renderer extends plugin_renderer_base {
 
         global $DB;
 
-        $yearsDB = $DB->get_records_sql('SELECT DISTINCT YEAR(FROM_UNIXTIME(d.dateissued)) as yearissued FROM {badge_issued} AS d JOIN {badge} AS b ON d.badgeid = b.id WHERE b.courseid = :courseid', array('courseid' => $reportbadges->courseid));
+        $yearsDB = $DB->get_records_sql('SELECT DISTINCT YEAR(FROM_UNIXTIME(d.dateissued)) as yearissued FROM {badge_issued} AS d JOIN {badge} AS b ON d.badgeid = b.id', array('courseid' => $reportbadges->courseid));
 
         $years[] = get_string('selecallyears', 'report_reportbadges');
 

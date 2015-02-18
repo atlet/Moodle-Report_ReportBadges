@@ -40,7 +40,7 @@ class report_reportbadges implements renderable {
 
         $this->courseid = $courseid;
 
-        $this->whereOptions[] = 'b.courseid = :courseid';
+        $this->whereOptions[] = 'en.courseid = :courseid';
         $this->whereParameters['courseid'] = $courseid;
 
         // Use page url if empty.
@@ -94,6 +94,8 @@ class report_reportbadges implements renderable {
                 "{badge_issued} AS d
           JOIN {badge} AS b ON d.badgeid = b.id
           JOIN {user} AS u ON d.userid = u.id
+          JOIN {user_enrolments} AS ue ON ue.userid = u.id
+          JOIN {enrol} AS en ON en.id = ue.enrolid
           JOIN {badge_criteria} AS t ON b.id = t.badgeid", implode(' AND ', $this->whereOptions),
                 $this->whereParameters);
         $this->table->define_baseurl($this->url);
@@ -116,6 +118,8 @@ class report_reportbadges implements renderable {
                 "{badge_issued} AS d
           JOIN {badge} AS b ON d.badgeid = b.id
           JOIN {user} AS u ON d.userid = u.id
+          JOIN {user_enrolments} AS ue ON ue.userid = u.id
+          JOIN {enrol} AS en ON en.id = ue.enrolid
           JOIN {badge_criteria} AS t ON b.id = t.badgeid", implode(' AND ', $this->whereOptions), $this->whereParameters);
         $this->table->define_baseurl($this->url);
         $this->table->is_downloadable(false);
@@ -129,6 +133,8 @@ class report_reportbadges implements renderable {
                 "{badge_issued} AS d
           JOIN {badge} AS b ON d.badgeid = b.id
           JOIN {user} AS u ON d.userid = u.id
+          JOIN {user_enrolments} AS ue ON ue.userid = u.id
+          JOIN {enrol} AS en ON en.id = ue.enrolid
           JOIN {badge_criteria} AS t ON b.id = t.badgeid", implode(' AND ', $this->whereOptions),
                 $this->whereParameters);
         $this->table->define_baseurl($this->url);
