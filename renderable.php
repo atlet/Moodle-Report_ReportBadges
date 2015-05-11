@@ -42,6 +42,8 @@ class report_reportbadges implements renderable {
 
         $this->whereOptions[] = 'en.courseid = :courseid';
         $this->whereParameters['courseid'] = $courseid;
+        
+        $this->whereOptions[] = 'd.visible = 1';
 
         // Use page url if empty.
         if (empty($url)) {
